@@ -3,7 +3,8 @@ module.exports = (sequelize, DataTypes) => {
   var Course = sequelize.define('Course', {
     code: {
       type:DataTypes.INTEGER,
-      primaryKey: true
+      primaryKey: true,
+      autoIncrement: true
     },
     name: DataTypes.STRING,
     creator_email: DataTypes.STRING,

@@ -1,0 +1,6 @@
+export const constants = {
+  STUDENT: 'STUDENT',
+  CREATOR: 'CREATOR',
+  PUBLISHED: 'PUBLISHED',
+  UNPUBLISHED: 'UNPUBLISHED'
+}

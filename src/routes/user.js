@@ -1,5 +1,14 @@
 import fetch from 'node-fetch';
+import {constants} from '../constants';
 var models = require('../models');
+
+export function authenticate(token){
+  return fetch(
+    'https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=' + token
+  )
+  .then(res => res.json())
+  .then(resjson => {return resjson});
+}
 
 export const user_routes = [
   {
@@ -10,19 +19,34 @@ export const user_routes = [
       if (typeof(payload) === 'string'){
         payload = JSON.parse(payload);
       }
-      
-      return fetch(
-        'https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=' + payload.gg_token_id
-      )
-      .then(res => res.json())
-      .then(json => {return json});
-    }
-  },
-  {
-    method: 'POST',
-    path: '/api/user/update',
-    handler: function (request, h){
-      return 'Update user';
+
+      return authenticate(payload.gg_token_id)
+        .then(resjson => {
+          if ((resjson.email_verified && resjson.email_verified === 'true')){
+            return models.User.findOrCreate({
+              where:{email: resjson.email}, 
+              defaults: {
+                first_name: resjson.given_name,
+                last_name: resjson.given_name,
+                role: constants.STUDENT,
+                link_profile_pix: resjson.picture
+                }
+              })
+              .spread((user, created) => {
+                return {'user_verified': true};
+              })
+              .catch(err => {
+                return {'user_verified': false};
+              });
+          }
+          else {
+            return {'user_verified': false};
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          return {'user_verified': false};
+        });
     }
   }
 ];
