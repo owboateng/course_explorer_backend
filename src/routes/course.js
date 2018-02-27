@@ -1,4 +1,6 @@
 import {authenticate} from './user';
+var models = require('../models');
+
 export const course_routes = [
   {
     method: 'POST',
@@ -18,8 +20,12 @@ export const course_routes = [
             }
           })
           .spread((course, created) => {
+            let course_created = false;
+            if (created){
+              course_created = true;
+            }
             return {
-              'course_created': true,
+              'course_created': course_created,
               'user_verified': true
             };
           })
@@ -65,6 +71,15 @@ export const course_routes = [
     path: '/api/course/section/update',
     handler: function (request, h){
       return 'Update course section';
+    }
+  },
+  {
+    method: 'GET',
+    path: '/api/courses',
+    handler: function (request, h){
+      return models.Course.findAll().then(courses => {
+        return {courselist: courses };
+      })
     }
   }
 ];
