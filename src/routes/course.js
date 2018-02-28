@@ -79,7 +79,16 @@ export const course_routes = [
     handler: function (request, h){
       return models.Course.findAll().then(courses => {
         return {courselist: courses };
-      })
+      });
+    }
+  },
+  {
+    method: 'GET',
+    path: '/api/course/{code}',
+    handler: function (request, h){
+      return models.Course.findOne(code).then(course => {
+        return {course: course };
+      });
     }
   }
 ];
