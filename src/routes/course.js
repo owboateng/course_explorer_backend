@@ -3,6 +3,24 @@ var models = require('../models');
 
 export const course_routes = [
   {
+    method: 'GET',
+    path: '/api/course/{code}',
+    handler: function (request, h){
+      return models.Course.findById(request.params.code).then(course => {
+        return {course: course };
+      });
+    }
+  },
+  {
+    method: 'GET',
+    path: '/api/courses',
+    handler: function (request, h){
+      return models.Course.findAll().then(courses => {
+        return {courselist: courses };
+      });
+    }
+  },
+  {
     method: 'POST',
     path: '/api/course/add',
     handler: function (request, h){
@@ -61,33 +79,42 @@ export const course_routes = [
   },
   {
     method: 'POST',
-    path: '/api/course/section/add',
+    path: '/api/course/delete',
     handler: function (request, h){
-      return 'Add new section to course';
-    }
-  },
-  {
-    method: 'POST',
-    path: '/api/course/section/update',
-    handler: function (request, h){
-      return 'Update course section';
-    }
-  },
-  {
-    method: 'GET',
-    path: '/api/courses',
-    handler: function (request, h){
-      return models.Course.findAll().then(courses => {
-        return {courselist: courses };
-      });
-    }
-  },
-  {
-    method: 'GET',
-    path: '/api/course/{code}',
-    handler: function (request, h){
-      return models.Course.findOne(code).then(course => {
-        return {course: course };
+      let payload = request.payload;
+      if (typeof(payload) === 'string'){
+        payload = JSON.parse(payload);
+      }
+      return authenticate(payload.gg_token_id)
+      .then(resjson => {
+        if ((resjson.email_verified && resjson.email_verified === 'true')){
+          return models.Course.destroy({
+            where:{
+              code: payload.course_code,
+            },
+          })
+          .then(() => {
+            return {
+              user_verified: true
+            };
+          })
+          .catch(err => {
+            return {
+              user_verified: true
+            };
+          });
+        }
+        else {
+          return {
+            user_verified: false
+          };
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        return {
+          user_verified: false
+        };
       });
     }
   }
