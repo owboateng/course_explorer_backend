@@ -15,6 +15,29 @@ export const section_routes = [
     }
   },
   {
+    method: 'GET',
+    path: '/api/course/sections/{course_code}/stats',
+    handler: function (request, h){
+      return models.Section.findAll({
+        where:{course_code:request.params.course_code}
+      })
+      .then(sections => {
+        let sections_with_stats = [];
+        if (sections.length > 0){
+          let count = 1;
+          sections_with_stats = sections.map((section) => {
+            let sec = {};
+            sec.reads = Math.floor((Math.random() * 100) + 1);
+            sec.title = 'Section ' + count;
+            count += 1;
+            return sec;
+          });
+        }
+        return {sectionlist: sections_with_stats };
+      });
+    }
+  },
+  {
     method: 'POST',
     path: '/api/course/section/add',
     handler: function (request, h){
